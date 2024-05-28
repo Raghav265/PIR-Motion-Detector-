@@ -1,0 +1,53 @@
+int offpin = 2;
+int ledpin = 4;
+int inputpin = 3;
+int pirstate = true;
+int val = 0;
+int minsecafterPIRlow = 5000;
+
+long unsigned int timeTurnedLow;
+boolean takeLowtime;
+
+int calibrationtime = 30;
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(offpin, OUTPUT);
+  pinMode(ledpin, OUTPUT);
+  pinMode(inputpin, INPUT);
+
+  takeLowtime = LOW;
+
+  Serial.begin(9600);
+
+  Serial.println("Waiting for the sensor to warm up");
+  Serial.println("Sensor Active");
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  val = digitalRead(inputpin);
+
+  if(val == HIGH){
+    
+    digitalWrite(ledpin, HIGH);
+    if(pirstate == LOW){
+      Serial.println("MOTION DETECTED");
+      digitalWrite(offpin, LOW);
+      pirstate = HIGH;
+    }
+  }
+  else{
+    if(pirstate == HIGH){
+      Serial.println("MOTION ENDED!!");
+      pirstate = LOW;
+      timeTurnedLow = millis();
+    }
+  }
+  if(!pirstate && (millis() - timeTurnedLow) > minsecafterPIRlow){
+    Serial.println("Extented time HIGH ended! ");
+    digitalWrite(offpin, HIGH);
+    digitalWrite(ledpin, LOW);
+  }
+  delay(1000);
+}
